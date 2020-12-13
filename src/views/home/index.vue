@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar">
+    <van-nav-bar class="page-nav-bar" fixed>
       <van-button
         class="search-btn"
         slot="title"
@@ -14,15 +14,13 @@
     </van-nav-bar>
     <!-- 频道列表 -->
     <van-tabs class="channel-tabs" v-model="active" animated swipeable>
-      <van-tab title="标签 1">内容 1</van-tab>
-      <van-tab title="标签 2">内容 2</van-tab>
-      <van-tab title="标签 3">内容 3</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
-      <van-tab title="标签 4">内容 4</van-tab>
+      <van-tab
+        :title="channel.name"
+        v-for="(channel, index) in channels"
+        :key="index"
+      >
+        <article-list :channel="channel" />
+      </van-tab>
       <div slot="nav-right" class="placeholder"></div>
       <div slot="nav-right" class="hamburger-btn">
         <i class="iconfont icon-gengduo"></i>
@@ -32,11 +30,31 @@
 </template>
 
 <script>
+import { getUserChannels } from '@/api/user'
+import ArticleList from '@/components/article-list'
 export default {
   name: 'HomeIndex',
+  components: {
+    ArticleList
+  },
   data() {
     return {
-      active: 0
+      active: 0,
+      channels: []
+    }
+  },
+  created() {
+    this.loadChannels()
+  },
+  methods: {
+    async loadChannels() {
+      try {
+        const { data } = await getUserChannels()
+        console.log(data)
+        this.channels = data.data.channels
+      } catch (err) {
+        this.$toast('获取频道列表数据失败')
+      }
     }
   }
 }
@@ -45,10 +63,12 @@ export default {
 <style lang="less" scoped>
 // 当前组件中加了 scoped 对内部样式的修改需要加 /deep/，或者去掉 scoped
 .home-container {
+  padding-top: 174px;
+  padding-bottom: 100px;
   /deep/ .van-nav-bar__title {
     max-width: unset;
   }
-  .search-btn {
+   .search-btn {
     width: 555px;
     height: 64px;
     background-color: #5babfb;
@@ -60,6 +80,11 @@ export default {
   }
   /deep/ .channel-tabs {
     .van-tabs__wrap {
+      position: fixed;
+      top: 92px;
+      left: 0;
+      right: 0;
+      z-index: 1;
       height: 82px;
     }
     // Tab 标签页
@@ -82,7 +107,7 @@ export default {
       background-color: #3296fa;
     }
 
-     // 汉堡
+    // 汉堡
     .placeholder {
       flex-shrink: 0;
       width: 66px;
