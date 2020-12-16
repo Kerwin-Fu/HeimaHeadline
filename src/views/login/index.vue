@@ -2,7 +2,13 @@
   <div class="login-container">
     <van-nav-bar class="page-nav-bar" title="登录">
       <!-- 只有传递了 redirect 这样一个参数，才显示返回按钮 -->
-      <van-icon v-if="$route.query.redirect" slot="left" name="cross" @click="$router.back()" color="#fff"/>
+      <van-icon
+        v-if="$route.query.redirect"
+        slot="left"
+        name="cross"
+        @click="$router.push($route.query.redirect || '/')"
+        color="#fff"
+      />
     </van-nav-bar>
     <van-form @submit="onSubmit" ref="loginForm">
       <van-field

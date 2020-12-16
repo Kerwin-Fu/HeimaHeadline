@@ -81,6 +81,7 @@
 <script>
 import { mapState } from 'vuex'
 import { getUserInfo } from '@/api/user'
+
 export default {
   name: 'MyIndex',
   data() {
@@ -98,6 +99,7 @@ export default {
     ...mapState(['user'])
   },
   methods: {
+    // 退出登录
     onLogout() {
       // 退出提示
       // 在组件中需要使用 this.$dialog 来调用弹框组件
@@ -112,9 +114,10 @@ export default {
         })
         .catch(() => {
           // on cancel
-          console.log('取消执行这里')
+          console.log('取消执行')
         })
     },
+    // 获取需要渲染的数据
     async loadUser () {
       try {
         const { data } = await getUserInfo()

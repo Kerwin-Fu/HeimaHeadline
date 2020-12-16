@@ -9,6 +9,7 @@
         size="small"
         round
         icon="search"
+        to="/search"
         >搜索</van-button
       >
     </van-nav-bar>
@@ -23,38 +24,76 @@
       </van-tab>
       <div slot="nav-right" class="placeholder"></div>
       <div slot="nav-right" class="hamburger-btn">
-        <i class="iconfont icon-gengduo"></i>
+        <i class="iconfont icon-gengduo" @click="isEditChannelShow = true"></i>
       </div>
     </van-tabs>
+    <!-- 频道编辑 -->
+    <van-popup
+      class="edit-channel-popup"
+      v-model="isEditChannelShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+      closeable
+      close-icon-position="top-left"
+    >
+      <channel-edit
+        @update-active="onUpdateActive"
+        :myChannels="channels"
+        :active="active"
+      />
+    </van-popup>
+    <!-- /频道编辑 -->
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
-import ArticleList from '@/components/article-list'
+import ArticleList from './components/article-list'
+import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage.js'
 export default {
   name: 'HomeIndex',
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   data() {
     return {
       active: 0,
-      channels: []
+      channels: [],
+      isEditChannelShow: false
     }
   },
   created() {
     this.loadChannels()
   },
+  computed: {
+    ...mapState(['user'])
+  },
   methods: {
+    // 获取频道数据
     async loadChannels() {
       try {
-        const { data } = await getUserChannels()
-        console.log(data)
-        this.channels = data.data.channels
+        let channels = []
+        const localChannels = getItem('TOUTIAO_CHANNELS')
+        if (this.user || !localChannels) {
+          // 登录 或者 本地没有存储 获取后端数据
+          const { data } = await getUserChannels()
+          this.channels = data.data.channels
+          return false
+        } else {
+          // 未登录并且本地没有数据
+          channels = localChannels
+        }
+        this.channels = channels
       } catch (err) {
         this.$toast('获取频道列表数据失败')
       }
+    },
+    onUpdateActive(index, isChannelEditShow = true) {
+      this.active = index
+      this.isEditChannelShow = isChannelEditShow // 关闭弹层
     }
   }
 }
@@ -68,7 +107,7 @@ export default {
   /deep/ .van-nav-bar__title {
     max-width: unset;
   }
-   .search-btn {
+  .search-btn {
     width: 555px;
     height: 64px;
     background-color: #5babfb;
@@ -135,6 +174,10 @@ export default {
         background-image: url(~@/assets/gradient-gray-line.png);
         background-size: contain;
       }
+    }
+    .edit-channel-popup {
+      padding-top: 100px;
+      box-sizing: border-box;
     }
   }
 }
