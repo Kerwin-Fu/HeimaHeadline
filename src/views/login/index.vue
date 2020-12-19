@@ -69,8 +69,8 @@ export default {
       // 控制倒计时组件的开关
       isCountDownShow: false,
       user: {
-        mobile: '',
-        code: ''
+        mobile: '13911111114',
+        code: '246810'
       },
       userFormRules: {
         mobile: [
